@@ -22,7 +22,7 @@ class MeetUpPlugin(BotPlugin):
     min_err_version = '3.2.3'
     # max_err_version = '3.3.0'
 
-    @botcmd
+    @botcmd(split_args_with=None)
     def meetup_next(self, mess, args):
         """TODO"""
         if len(args) == 0:
