@@ -17,7 +17,7 @@ MEETUP_API_HOST = 'api.meetup.com'
 
 
 class MeetUpPlugin(BotPlugin):
-    """Basic Err integration with Jenkins CI"""
+    """Basic Err integration with meetup.com"""
 
     min_err_version = '3.2.3'
     # max_err_version = '3.3.0'
@@ -26,17 +26,19 @@ class MeetUpPlugin(BotPlugin):
     def meetup_next(self, mess, args):
         """TODO"""
         if len(args) == 0:
-            return 'Which MeetUp group would you like to query ?'
+            return 'Which MeetUp group would you like to query?'
 
         conn = client.HTTPSConnection(MEETUP_API_HOST)
         conn.request("GET", "/{name}/events".format(name=args[0]))
         r = conn.getresponse()
 
+        if r.status == 404:
+            return 'No MeetUp group found with this name.'
+
         if r.status != 200:
-            return "Oops, something went wrong."
+            return 'Oops, something went wrong.'
 
         res = json.loads(r.read().decode())
-
         return self.format_events(res)
 
     @staticmethod
