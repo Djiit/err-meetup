@@ -58,13 +58,7 @@ class TestMeetUpPluginStaticMethods(object):
             "how_to_find_us": "Dummy Cafe",
             "visibility": "public"
         }]
-        result = meetup.MeetUpPlugin.format_events(data)
-        assert result == """Next events for Dummy Events:
-[23/03/2016] "Dummy Events #0" at Dummy Cafe - Paris \
-(http://www.meetup.com/Dummy_Events/events/123456/)
-"""
-
-    def test_format_events_empty_list(self):
-        data = []
-        result = meetup.MeetUpPlugin.format_events(data)
-        assert result == """No upcoming events."""
+        for event in data:
+            result = meetup.MeetUpPlugin.format_event(event)
+        assert result == """[23/03/2016] "Dummy Events #0" at Dummy Cafe - \
+Paris (http://www.meetup.com/Dummy_Events/events/123456/)"""

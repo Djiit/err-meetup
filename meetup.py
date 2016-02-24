@@ -105,7 +105,7 @@ class MeetUpPlugin(BotPlugin):
         return datetime.fromtimestamp(timestamp/1000).strftime('%d/%m/%Y')
 
     @staticmethod
-    def format_event(results):
+    def format_event(event):
         env = Environment()
         env.filters['datetimeformat'] = MeetUpPlugin.datetimeformat
 
