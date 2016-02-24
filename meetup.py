@@ -48,7 +48,7 @@ class MeetUpPlugin(BotPlugin):
         env = Environment()
         env.filters['datetimeformat'] = MeetUpPlugin.datetimeformat
 
-        EVENTS_TEMPLATE = env.from_string("""Next events for {{results['0'].group.name}}:
+        EVENTS_TEMPLATE = env.from_string("""Next events for {{results[0].group.name}}:
 {% for e in results%}[{{results[e].time|datetimeformat}}] \
 "{{results[e].name}}" at {{results[e].venue.name}} - \
 {{results[e].venue.city}} ({{results[e].link}})
