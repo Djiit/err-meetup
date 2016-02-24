@@ -22,38 +22,93 @@ class MeetUpPlugin(BotPlugin):
     min_err_version = '3.2.3'
     # max_err_version = '3.3.0'
 
+    def activate(self):
+        super().activate()
+        self.start_poller(10, self.poll_events)  # DEV: 10=3600
+        return
+
+    def poll_events(self):
+        """Poll upcoming events for group in the watchlist."""
+        for group in self.watchlist:
+            status, events = self.request_events(group['name'])
+
+            if status == 404:
+                self.log.warning('No MeetUp group found with this name.')
+                return
+            if status != 200:
+                self.log.warning('Oops, something went wrong.')
+                return
+
+            for event in events:
+                if event['id'] not in group['events']:
+                    for room in self.bot_config.CHATROOM_PRESENCE:
+                        self.send(
+                           room,
+                           self.format_event(event),
+                           message_type='groupchat')
+        return
+
     @botcmd(split_args_with=None)
     def meetup_next(self, mess, args):
-        """TODO"""
+        """Fetch the upcoming events for a from meetup.com."""
         if len(args) == 0:
             return 'Which MeetUp group would you like to query?'
 
-        conn = client.HTTPSConnection(MEETUP_API_HOST)
-        conn.request("GET", "/{name}/events".format(name=args[0]))
-        r = conn.getresponse()
+        status, events = self.request_events(args[0])
 
-        if r.status == 404:
+        if status == 404:
             return 'No MeetUp group found with this name.'
 
-        if r.status != 200:
+        if status != 200:
             return 'Oops, something went wrong.'
 
-        res = json.loads(r.read().decode())
-        return self.format_events(res)
+        if len(events) == 0:
+            return 'No upcoming events.'
+
+        for event in events:
+            yield self.format_event(events)
+        return
+
+    @botcmd(split_args_with=None)
+    def meetup_watch(self, mess, args):
+        """Add a group to the watchlist."""
+        if args[0] in [g['name'] for g in self['watchlist']]:
+            return 'This group is already in the watchlist.'
+
+        # we might need a simple check here : does the group exist ?
+
+        self['watchlist'].append({'name': args[0], 'events': []})
+
+        return 'Watchlist updated : {0}'.format(self['watchlist'])
+
+    @botcmd(split_args_with=None)
+    def meetup_unwatch(self, mess, args):
+        """Fetch the upcoming events for a from meetup.com."""
+        if args[0] not in [g['name'] for g in self['watchlist']]:
+            return 'This group is not in the watchlist.'
+
+        self['watchlist'] = [g for g in self['watchlist']
+                             if g['name'] != args[0]]
+
+        return 'Watchlist updated : {0}'.format(self['watchlist'])
+
+    @staticmethod
+    def request_events(group_name):
+        """ Fetch meetup.com Events v3 API endpoint. """
+        conn = client.HTTPSConnection(MEETUP_API_HOST)
+        conn.request("GET", "/{name}/events".format(name=group_name))
+        r = conn.getresponse()
+        return r.status, json.loads(r.read().decode())
 
     @staticmethod
     def datetimeformat(timestamp):
         return datetime.fromtimestamp(timestamp/1000).strftime('%d/%m/%Y')
 
     @staticmethod
-    def format_events(results):
+    def format_event(results):
         env = Environment()
         env.filters['datetimeformat'] = MeetUpPlugin.datetimeformat
 
-        EVENTS_TEMPLATE = env.from_string("""{% if results %}Next events for {{results[0].group.name}}:
-{% for e in results%}[{{e.time|datetimeformat}}] \
-"{{e.name}}" at {{e.venue.name}} - \
-{{e.venue.city}} ({{e.link}})
-{% endfor %}{% else%}No upcoming events.{% endif %}
-""")
-        return EVENTS_TEMPLATE.render({"results": results})
+        EVENTS_TEMPLATE = env.from_string("""[{{e.time|datetimeformat}}] \
+"{{e.name}}" at {{e.venue.name}} - {{e.venue.city}} ({{e.link}})""")
+        return EVENTS_TEMPLATE.render({"e": event})
