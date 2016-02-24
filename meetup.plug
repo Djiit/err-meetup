@@ -1,0 +1,9 @@
+[Core]
+Name = MeetUp
+Module = meetup
+
+[Python]
+Version = 2+
+
+[Documentation]
+Description = Basic Err integration with meetup.com
