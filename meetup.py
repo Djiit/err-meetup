@@ -74,9 +74,7 @@ class MeetUpPlugin(BotPlugin):
         if len(events) == 0:
             return 'No upcoming events.'
 
-        for event in events:
-            yield self.format_event(event)
-        return
+        return '\n'.join([self.format_event(e) for e in events])
 
     @botcmd(split_args_with=None)
     def meetup_watch(self, mess, args):
