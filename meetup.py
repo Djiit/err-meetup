@@ -14,6 +14,7 @@ from errbot import BotPlugin, botcmd
 
 
 MEETUP_API_HOST = 'api.meetup.com'
+POLL_INTERVAL = 10  # DEV: 10=3600
 
 
 class MeetUpPlugin(BotPlugin):
@@ -24,7 +25,7 @@ class MeetUpPlugin(BotPlugin):
 
     def activate(self):
         super().activate()
-        self.start_poller(10, self.poll_events)  # DEV: 10=3600
+        self.start_poller(POLL_INTERVAL, self.poll_events)
         return
 
     def poll_events(self):
@@ -111,7 +112,6 @@ class MeetUpPlugin(BotPlugin):
     def format_event(event):
         env = Environment()
         env.filters['datetimeformat'] = MeetUpPlugin.datetimeformat
-        self.log.debug
         EVENTS_TEMPLATE = env.from_string("""[{{e.time|datetimeformat}}] \
 "{{e.name}}" at {{e.venue.name}} - {{e.venue.city}} ({{e.link}})""")
         return EVENTS_TEMPLATE.render({"e": event})
