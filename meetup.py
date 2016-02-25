@@ -14,7 +14,7 @@ from errbot import BotPlugin, botcmd
 
 
 MEETUP_API_HOST = 'api.meetup.com'
-POLL_INTERVAL = 10  # DEV: 10=3600
+POLL_INTERVAL = 3600  # DEV: 10=3600
 
 
 class MeetUpPlugin(BotPlugin):
@@ -22,6 +22,8 @@ class MeetUpPlugin(BotPlugin):
 
     min_err_version = '3.2.3'
     # max_err_version = '3.3.0'
+
+    watchlist = []
 
     def activate(self):
         super().activate()
@@ -31,7 +33,8 @@ class MeetUpPlugin(BotPlugin):
     def poll_events(self):
         """Poll upcoming events for group in the watchlist."""
         try:
-            for group in self.watchlist:
+            watchlist = self['watchlist']
+            for i, group in enumerate(watchlist):
                 status, events = self.request_events(group['name'])
 
                 if status == 404:
@@ -43,11 +46,13 @@ class MeetUpPlugin(BotPlugin):
 
                 for event in events:
                     if event['id'] not in group['events']:
+                        watchlist[i]['events'] += [event['id']]
                         for room in self.bot_config.CHATROOM_PRESENCE:
                             self.send(
                                room,
-                               self.format_event(event),
+                               'New meetup !\n' + self.format_event(event),
                                message_type='groupchat')
+            self['watchlist'] = watchlist
         except AttributeError:
             self['watchlist'] = []
         return
@@ -80,8 +85,7 @@ class MeetUpPlugin(BotPlugin):
             return 'This group is already in the watchlist.'
 
         # we might need a simple check here : does the group exist ?
-
-        self['watchlist'].append({'name': args[0], 'events': []})
+        self['watchlist'] += [{'name': args[0], 'events': []}]
 
         return 'Watchlist updated : {0}'.format(self['watchlist'])
 
@@ -95,6 +99,16 @@ class MeetUpPlugin(BotPlugin):
                              if g['name'] != args[0]]
 
         return 'Watchlist updated : {0}'.format(self['watchlist'])
+
+    @botcmd(split_args_with=None)
+    def meetup_list(self, mess, args):
+        """Display the current watchlist."""
+        return self['watchlist']
+
+    @botcmd(split_args_with=None)
+    def meetup_fetch(self, mess, args):
+        """Poll meetup.com manually for new incoming meetups."""
+        return self.poll_events()
 
     @staticmethod
     def request_events(group_name):
@@ -115,3 +129,8 @@ class MeetUpPlugin(BotPlugin):
         EVENTS_TEMPLATE = env.from_string("""[{{e.time|datetimeformat}}] \
 "{{e.name}}" at {{e.venue.name}} - {{e.venue.city}} ({{e.link}})""")
         return EVENTS_TEMPLATE.render({"e": event})
+
+
+# !meetup next TensorFlow-Paris
+# !meetup watch TensorFlow-Paris
+# !meetup unwatch TensorFlow-Paris

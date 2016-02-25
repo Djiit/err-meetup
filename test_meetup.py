@@ -62,3 +62,8 @@ class TestMeetUpPluginStaticMethods(object):
             result = meetup.MeetUpPlugin.format_event(event)
         assert result == """[23/03/2016] "Dummy Events #0" at Dummy Cafe - \
 Paris (http://www.meetup.com/Dummy_Events/events/123456/)"""
+
+    def test_datetimeformat(self):
+        timestamp = 1448071373000
+        result = meetup.MeetUpPlugin.datetimeformat(timestamp)
+        assert result == '21/11/2015'
