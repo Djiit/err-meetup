@@ -69,7 +69,7 @@ class MeetUpPlugin(BotPlugin):
             return 'No upcoming events.'
 
         for event in events:
-            yield self.format_event(events)
+            yield self.format_event(event)
         return
 
     @botcmd(split_args_with=None)
@@ -111,7 +111,7 @@ class MeetUpPlugin(BotPlugin):
     def format_event(event):
         env = Environment()
         env.filters['datetimeformat'] = MeetUpPlugin.datetimeformat
-
+        self.log.debug
         EVENTS_TEMPLATE = env.from_string("""[{{e.time|datetimeformat}}] \
 "{{e.name}}" at {{e.venue.name}} - {{e.venue.city}} ({{e.link}})""")
         return EVENTS_TEMPLATE.render({"e": event})
