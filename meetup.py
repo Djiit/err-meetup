@@ -29,23 +29,26 @@ class MeetUpPlugin(BotPlugin):
 
     def poll_events(self):
         """Poll upcoming events for group in the watchlist."""
-        for group in self.watchlist:
-            status, events = self.request_events(group['name'])
+        try:
+            for group in self.watchlist:
+                status, events = self.request_events(group['name'])
 
-            if status == 404:
-                self.log.warning('No MeetUp group found with this name.')
-                return
-            if status != 200:
-                self.log.warning('Oops, something went wrong.')
-                return
+                if status == 404:
+                    self.log.warning('No MeetUp group found with this name.')
+                    return
+                if status != 200:
+                    self.log.warning('Oops, something went wrong.')
+                    return
 
-            for event in events:
-                if event['id'] not in group['events']:
-                    for room in self.bot_config.CHATROOM_PRESENCE:
-                        self.send(
-                           room,
-                           self.format_event(event),
-                           message_type='groupchat')
+                for event in events:
+                    if event['id'] not in group['events']:
+                        for room in self.bot_config.CHATROOM_PRESENCE:
+                            self.send(
+                               room,
+                               self.format_event(event),
+                               message_type='groupchat')
+        except AttributeError:
+            self['watchlist'] = []
         return
 
     @botcmd(split_args_with=None)

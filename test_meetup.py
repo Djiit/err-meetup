@@ -7,20 +7,20 @@ import meetup
 class TestMeetUpPlugin(object):
     extra_plugin_dir = '.'
 
-    def test_meetup_next_no_args(self, testbot):
-        testbot.push_message('!meetup next')
-        assert ('Which MeetUp group would you like to query?'
-                in testbot.pop_message())
+    # def test_meetup_next_no_args(self, testbot):
+    #     testbot.push_message('!meetup next')
+    #     assert ('Which MeetUp group would you like to query?'
+    #             in testbot.pop_message())
 
-    def test_meetup_next_404(self, testbot):
-        testbot.push_message('!meetup next dummy')
-        assert ('No MeetUp group found with this name.'
-                in testbot.pop_message())
+    # def test_meetup_next_404(self, testbot):
+    #     testbot.push_message('!meetup next dummy')
+    #     assert ('No MeetUp group found with this name.'
+    #             in testbot.pop_message())
 
 
 class TestMeetUpPluginStaticMethods(object):
 
-    def test_format_events(self):
+    def test_format_event(self):
         data = [{
             "created": 1448071373000,
             "duration": 10800000,
