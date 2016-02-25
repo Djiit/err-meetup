@@ -7,6 +7,8 @@ Err-meetup is a plugin for [Err](https://github.com/gbin/err) that allows you to
 ## Features
 
 * List upcoming events of a group.
+* Poll new events from a user-defined watchlist and announce them.
+* Add / remove groups to the meetup watchlist.
 
 Have an idea ? Open an [issue](https://github.com/Djiit/err-meetup/issues) or send me a [Pull Request](https://github.com/Djiit/err-meetup/pulls).
 
