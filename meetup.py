@@ -129,8 +129,3 @@ class MeetUpPlugin(BotPlugin):
         EVENTS_TEMPLATE = env.from_string("""[{{e.time|datetimeformat}}] \
 "{{e.name}}" at {{e.venue.name}} - {{e.venue.city}} ({{e.link}})""")
         return EVENTS_TEMPLATE.render({"e": event})
-
-
-# !meetup next TensorFlow-Paris
-# !meetup watch TensorFlow-Paris
-# !meetup unwatch TensorFlow-Paris
