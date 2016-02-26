@@ -19,7 +19,7 @@ Have an idea ? Open an [issue](https://github.com/Djiit/err-meetup/issues) or se
 As admin of an err chatbot, send the following command over XMPP:
 
 ```
-!install git://github.com/Djiit/err-meetup.git
+!repos install git://github.com/Djiit/err-meetup.git
 ```
 
 ### Commands
