@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
 from datetime import datetime
+from itertools import chain
 import json
 try:
     from http import client
@@ -15,6 +16,7 @@ from errbot import BotPlugin, botcmd
 
 MEETUP_API_HOST = 'api.meetup.com'
 POLL_INTERVAL = 3600  # DEV: 10=3600
+CONFIG_TEMPLATE = {'CHATROOMS': ()}
 
 
 class MeetUpPlugin(BotPlugin):
@@ -25,6 +27,18 @@ class MeetUpPlugin(BotPlugin):
 
     watchlist = []
 
+    def get_configuration_template(self):
+        return CONFIG_TEMPLATE
+
+    def configure(self, configuration):
+        if configuration is not None and configuration != {}:
+            config = dict(chain(CONFIG_TEMPLATE.items(),
+                                configuration.items()))
+        else:
+            config = CONFIG_TEMPLATE
+        super().configure(config)
+        return
+
     def activate(self):
         super().activate()
         self.start_poller(POLL_INTERVAL, self.poll_events)
@@ -32,6 +46,10 @@ class MeetUpPlugin(BotPlugin):
 
     def poll_events(self):
         """Poll upcoming events for group in the watchlist."""
+        chatrooms = (self.config['CHATROOMS']
+                     if self.config['CHATROOMS']
+                     else self.bot_config.CHATROOM_PRESENCE)
+
         try:
             watchlist = self['watchlist']
             for i, group in enumerate(watchlist):
@@ -47,7 +65,7 @@ class MeetUpPlugin(BotPlugin):
                 for event in events:
                     if event['id'] not in group['events']:
                         watchlist[i]['events'] += [event['id']]
-                        for room in self.bot_config.CHATROOM_PRESENCE:
+                        for room in chatrooms:
                             self.send(
                                room,
                                'New meetup !\n' + self.format_event(event),
