@@ -25,3 +25,11 @@ As admin of an err chatbot, send the following command over XMPP:
 ### Commands
 
 Use `!help MeetUp` to see the available commands and their explanation.
+
+## Configuration
+
+Send configuration commands through chat message to this plugins as in :
+
+```
+!config MeetUp {'CHATROOMS': ()}
+```
