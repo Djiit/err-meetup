@@ -19,7 +19,7 @@ Have an idea ? Open an [issue](https://github.com/Djiit/err-meetup/issues) or se
 As admin of an err chatbot, send the following command over XMPP:
 
 ```
-!repos install git://github.com/Djiit/err-meetup.git
+!repos install https://github.com/Djiit/err-meetup.git
 ```
 
 ### Commands
@@ -31,5 +31,5 @@ Use `!help MeetUp` to see the available commands and their explanation.
 Send configuration commands through chat message to this plugins as in :
 
 ```
-!config MeetUp {'CHATROOMS': ()}
+!plugin config MeetUp {'CHATROOMS': ()}
 ```

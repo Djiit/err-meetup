@@ -25,8 +25,6 @@ class MeetUpPlugin(BotPlugin):
     min_err_version = '3.2.3'
     # max_err_version = '3.3.0'
 
-    watchlist = []
-
     def get_configuration_template(self):
         return CONFIG_TEMPLATE
 
@@ -42,6 +40,13 @@ class MeetUpPlugin(BotPlugin):
     def activate(self):
         super().activate()
         self.start_poller(POLL_INTERVAL, self.poll_events)
+        self.init_store('watchlist', [])
+        return
+
+    def init_store(self, key, default_value):
+        """ Boostrap the internal storage with default values"""
+        if key not in self:
+            self[key] = default_value
         return
 
     def poll_events(self):
