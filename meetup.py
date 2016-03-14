@@ -49,12 +49,20 @@ class MeetUpPlugin(BotPlugin):
             self[key] = default_value
         return
 
-    def poll_events(self):
-        """Poll upcoming events for group in the watchlist."""
+    def broadcast(self, mess):
+        """Shortcut to broadcast a message to all elligible chatrooms."""
         chatrooms = (self.config['CHATROOMS']
                      if self.config['CHATROOMS']
                      else self.bot_config.CHATROOM_PRESENCE)
 
+        for room in chatrooms:
+            self.send(self.build_identifier(room),
+                      mess,
+                      message_type='groupchat')
+        return
+
+    def poll_events(self):
+        """Poll upcoming events for group in the watchlist."""
         try:
             watchlist = self['watchlist']
             for i, group in enumerate(watchlist):
@@ -70,11 +78,8 @@ class MeetUpPlugin(BotPlugin):
                 for event in events:
                     if event['id'] not in group['events']:
                         watchlist[i]['events'] += [event['id']]
-                        for room in chatrooms:
-                            self.send(
-                               room,
-                               'New meetup !\n' + self.format_event(event),
-                               message_type='groupchat')
+                        self.broadcast('New meetup !\n{0}'.format(
+                            self.format_event(event)))
             self['watchlist'] = watchlist
         except AttributeError:
             self['watchlist'] = []
