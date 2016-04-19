@@ -61,7 +61,6 @@ class MeetUpPlugin(BotPlugin):
 
     def poll_events(self):
         """Poll upcoming events for group in the watchlist."""
-        print(self['watchlist'])
         try:
             watchlist = self['watchlist']
             for i, group in enumerate(watchlist):
