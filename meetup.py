@@ -138,6 +138,8 @@ class MeetUpPlugin(BotPlugin):
     @botcmd(split_args_with=None)
     def meetup_list(self, mess, args):
         """Display the current watchlist."""
+        if not self['watchlist']:
+            return 'Watchlist is empty.'
         yield 'Currently watched MeetUp groups:'
         yield ', '.join([e['name'] for e in self['watchlist']])
 
