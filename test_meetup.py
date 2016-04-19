@@ -17,6 +17,25 @@ class TestMeetUpPlugin(object):
         assert ('No MeetUp group found with this name.'
                 in testbot.pop_message())
 
+    def test_meetup_watch(self, testbot):
+        testbot.push_message('!meetup watch ReactJS-Paris')
+        assert ('Watchlist updated : ReactJS-Paris'
+                in testbot.pop_message())
+
+    def test_meetup_watch_no_args(self, testbot):
+        testbot.push_message('!meetup watch')
+        assert ('Which MeetUp group would you add to the watchlist?'
+                in testbot.pop_message())
+
+    def test_meetup_unwatch_not_in_list(self, testbot):
+        testbot.push_message('!meetup unwatch ChatBots-Paris')
+        assert ('This group is not in the watchlist.'
+                in testbot.pop_message())
+
+    def test_meetup_unwatch_no_args(self, testbot):
+        testbot.push_message('!meetup unwatch')
+        assert ('Which MeetUp group would you remove from the watchlist?'
+                in testbot.pop_message())
 
 class TestMeetUpPluginStaticMethods(object):
 
