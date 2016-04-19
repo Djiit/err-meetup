@@ -15,7 +15,7 @@ from errbot import BotPlugin, botcmd
 
 
 MEETUP_API_HOST = 'api.meetup.com'
-POLL_INTERVAL = 3600  # DEV: 10=3600
+POLL_INTERVAL = 3600
 CONFIG_TEMPLATE = {'CHATROOMS': ()}
 
 
@@ -44,21 +44,19 @@ class MeetUpPlugin(BotPlugin):
         return
 
     def init_store(self, key, default_value):
-        """ Boostrap the internal storage with default values"""
+        """Boostrap the internal storage with default values"""
         if key not in self:
             self[key] = default_value
         return
 
-    def broadcast(self, mess):
-        """Shortcut to broadcast a message to all elligible chatrooms."""
+    def broadcast(self, msg):
+        """Broadcast a message to all elligible chatrooms."""
         chatrooms = (self.config['CHATROOMS']
                      if self.config['CHATROOMS']
                      else self.bot_config.CHATROOM_PRESENCE)
 
         for room in chatrooms:
-            self.send(self.build_identifier(room),
-                      mess,
-                      message_type='groupchat')
+            self.send(self.build_identifier(room), msg)
         return
 
     def poll_events(self):
@@ -107,38 +105,50 @@ class MeetUpPlugin(BotPlugin):
     @botcmd(split_args_with=None)
     def meetup_watch(self, mess, args):
         """Add a group to the watchlist."""
+        if len(args) == 0:
+            return 'Which MeetUp group would you add to the watchlist?'
+
         if args[0] in [g['name'] for g in self['watchlist']]:
             return 'This group is already in the watchlist.'
 
         # we might need a simple check here : does the group exist ?
         self['watchlist'] += [{'name': args[0], 'events': []}]
 
-        return 'Watchlist updated : {0}'.format(self['watchlist'])
+        return 'Watchlist updated : {0}'.format(
+            ', '.join([e['name'] for e in self['watchlist']]))
 
     @botcmd(split_args_with=None)
     def meetup_unwatch(self, mess, args):
-        """Fetch the upcoming events for a from meetup.com."""
+        """Remove a group from the watchlist."""
+        if len(args) == 0:
+            return 'Which MeetUp group would you remove from the watchlist?'
+
         if args[0] not in [g['name'] for g in self['watchlist']]:
             return 'This group is not in the watchlist.'
 
         self['watchlist'] = [g for g in self['watchlist']
                              if g['name'] != args[0]]
 
-        return 'Watchlist updated : {0}'.format(self['watchlist'])
+        if not self['watchlist']:
+            return 'Watchlist is now empty.'
+
+        return 'Watchlist updated : {0}'.format(
+            ', '.join([e['name'] for e in self['watchlist']]))
 
     @botcmd(split_args_with=None)
     def meetup_list(self, mess, args):
         """Display the current watchlist."""
-        return self['watchlist']
+        yield 'Currently watched MeetUp groups:'
+        yield ', '.join([e['name'] for e in self['watchlist']])
 
     @botcmd(split_args_with=None)
     def meetup_fetch(self, mess, args):
         """Poll meetup.com manually for new incoming meetups."""
-        return self.poll_events()
+        self.poll_events()
 
     @staticmethod
     def request_events(group_name):
-        """ Fetch meetup.com Events v3 API endpoint. """
+        """Query the meetup.com Events API v3. """
         conn = client.HTTPSConnection(MEETUP_API_HOST)
         conn.request("GET", "/{name}/events".format(name=group_name))
         r = conn.getresponse()
@@ -146,10 +156,12 @@ class MeetUpPlugin(BotPlugin):
 
     @staticmethod
     def datetimeformat(timestamp):
+        """Jinja filter for date formating."""
         return datetime.fromtimestamp(timestamp/1000).strftime('%d/%m/%Y')
 
     @staticmethod
     def format_event(event):
+        """Format event data."""
         env = Environment()
         env.filters['datetimeformat'] = MeetUpPlugin.datetimeformat
         EVENTS_TEMPLATE = env.from_string("""[{{e.time|datetimeformat}}] \
