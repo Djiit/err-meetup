@@ -61,6 +61,7 @@ class MeetUpPlugin(BotPlugin):
 
     def poll_events(self):
         """Poll upcoming events for group in the watchlist."""
+        print(self['watchlist'])
         try:
             watchlist = self['watchlist']
             for i, group in enumerate(watchlist):
@@ -140,8 +141,8 @@ class MeetUpPlugin(BotPlugin):
         """Display the current watchlist."""
         if not self['watchlist']:
             return 'Watchlist is empty.'
-        yield 'Currently watched MeetUp groups:'
-        yield ', '.join([e['name'] for e in self['watchlist']])
+        return ('Currently watched MeetUp groups:\n' +
+                ', '.join([e['name'] for e in self['watchlist']]))
 
     @botcmd(split_args_with=None)
     def meetup_fetch(self, mess, args):
